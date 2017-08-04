@@ -1,8 +1,6 @@
 # BindingNinja
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/binding_ninja`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This is method wrapper for passing binding of method caller implcitly.
 
 ## Installation
 
@@ -22,7 +20,23 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+class Foo
+  extend BindingNinja
+
+  def foo(binding, arg1, arg2)
+    p binding
+    p arg1
+    p arg2
+  end
+  auto_inject_binding :foo
+end
+
+Foo.new.foo(1, 2) 
+# => <Binding of toplevel>
+# => 1
+# => 2
+```
 
 ## Development
 
