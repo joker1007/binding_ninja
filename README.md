@@ -66,7 +66,7 @@ Foo.new.foo2(1, 2)
 `:if` option can accept Proc object and Symbol object.
 If option accepts a proc or symbol, uses result of evaluating the proc or method named by the symbol.
 
-## Compara to binding_of_caller
+## Compare to binding_of_caller
 ```ruby
 require "benchmark/ips"
 require "binding_ninja"
