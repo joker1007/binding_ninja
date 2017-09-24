@@ -1,4 +1,5 @@
 # BindingNinja
+[![Build Status](https://travis-ci.org/joker1007/binding_ninja.svg?branch=master)](https://travis-ci.org/joker1007/binding_ninja)
 
 This is method wrapper for passing binding of method caller implcitly.
 
