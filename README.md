@@ -30,13 +30,38 @@ class Foo
     p arg2
   end
   auto_inject_binding :foo
+
+  def foo2(binding, arg1, arg2)
+    p binding
+    p arg1
+    p arg2
+  end
+  auto_inject_binding :foo2, if: ENV["ENABLE_BINDING_NINJA"]
+  # or
+  auto_inject_binding :foo2, if: ->(obj) { obj.enable_auto_inject_binding? }
+  # or
+  auto_inject_binding :foo2, if: :enable_auto_inject_binding?
+
+  def enable_auto_inject_binding?
+    true
+  end
 end
 
 Foo.new.foo(1, 2) 
 # => <Binding of toplevel>
 # => 1
 # => 2
+
+# if ENABLE_BINDING_NINJA environment variable is nil or false,
+# binding arguments is nil.
+Foo.new.foo2(1, 2) 
+# => nil
+# => 1
+# => 2
 ```
+
+`:if` option can accept Proc object and Symbol object.
+If option accepts a proc or symbol, uses result of evaluating the proc or method named by the symbol.
 
 ## Development
 
