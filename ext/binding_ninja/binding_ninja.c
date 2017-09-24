@@ -12,7 +12,6 @@ auto_inject_binding(int argc, VALUE *argv, VALUE mod)
     static ID extensions_id;
     static ID keyword_ids[1];
     VALUE extensions, ext_mod, method_sym, options, opt, cond;
-    int arity;
 
     if (!keyword_ids[0]) {
       keyword_ids[0] = rb_intern("if");
@@ -38,8 +37,7 @@ auto_inject_binding(int argc, VALUE *argv, VALUE mod)
     }
 
     mid = SYM2ID(method_sym);
-    arity = rb_mod_method_arity(mod, mid);
-    if (abs(arity) < 1) {
+    if (abs(rb_mod_method_arity(mod, mid)) < 1) {
       rb_raise(rb_eArgError, "target method receives 1 or more arguments");
     }
 
@@ -62,6 +60,12 @@ static VALUE
 auto_inject_binding_invoke(int argc, VALUE *argv, VALUE self)
 {
   VALUE method_sym, options, binding, args_ary, cond;
+  static VALUE dummy_proc_args, dummy_method_arg[0];
+
+  if (!dummy_proc_args) {
+    dummy_proc_args = rb_ary_new();
+    rb_obj_freeze(dummy_proc_args);
+  }
 
   method_sym = ID2SYM(rb_frame_this_func());
   options = rb_cvar_get(CLASS_OF(self), options_id);
@@ -72,11 +76,10 @@ auto_inject_binding_invoke(int argc, VALUE *argv, VALUE self)
     if (abs(rb_proc_arity(cond)) > 0) {
       cond = rb_proc_call(cond, rb_ary_new_from_args(1, self));
     } else {
-      cond = rb_proc_call(cond, rb_ary_new());
+      cond = rb_proc_call(cond, dummy_proc_args);
     }
   } else if (SYMBOL_P(cond)) {
-    VALUE method_argv[0];
-    cond = rb_method_call(0, method_argv, rb_obj_method(self, cond));
+    cond = rb_method_call(0, dummy_method_arg, rb_obj_method(self, cond));
   }
 
   args_ary = rb_ary_new_from_values(argc, argv);
