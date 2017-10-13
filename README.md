@@ -110,20 +110,21 @@ end
 
 ```
 Warming up --------------------------------------
-       binding_ninja    92.504k i/100ms
+       binding_ninja   106.598k i/100ms
 binding_ninja_with_condition
-                        75.534k i/100ms
-   binding_of_caller     6.830k i/100ms
+                        49.660k i/100ms
+   binding_of_caller     6.799k i/100ms
 Calculating -------------------------------------
-       binding_ninja      1.133M (± 0.2%) i/s -      5.735M in   5.063997s
+       binding_ninja      1.351M (± 0.4%) i/s -      6.822M in   5.051283s
 binding_ninja_with_condition
-                        886.195k (± 0.4%) i/s -      4.457M in   5.028912s
-   binding_of_caller     70.156k (± 0.8%) i/s -    355.160k in   5.062701s
+                        566.555k (± 0.3%) i/s -      2.880M in   5.083895s
+   binding_of_caller     69.968k (± 0.8%) i/s -    353.548k in   5.053337s
 
 Comparison:
-       binding_ninja:  1132557.7 i/s
-binding_ninja_with_condition:   886195.0 i/s - 1.28x  slower
-   binding_of_caller:    70156.5 i/s - 16.14x  slower
+       binding_ninja:  1350619.1 i/s
+binding_ninja_with_condition:   566555.1 i/s - 2.38x  slower
+   binding_of_caller:    69968.2 i/s - 19.30x  slower
+
 ```
 
 13x - 16x faster than binding_of_caller.
