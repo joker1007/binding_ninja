@@ -51,7 +51,9 @@ RSpec.describe BindingNinja do
   end
 
   class Baz < Bar
-    @auto_inject_binding_options[:foo6] = true
+    def enable_auto_inject_binding?
+      true
+    end
   end
 
   klass = Class.new do
@@ -123,7 +125,7 @@ RSpec.describe BindingNinja do
       :foo3 => nil,
       :foo4 => an_instance_of(Proc),
       :foo5 => :enable_auto_inject_binding?,
-      :foo6 => true,
+      :foo6 => :enable_auto_inject_binding?,
     })
     expect(klass.auto_inject_binding_options).to match({})
   end

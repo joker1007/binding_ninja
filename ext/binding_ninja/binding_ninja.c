@@ -2,6 +2,8 @@
 
 VALUE rb_mBindingNinja;
 static VALUE auto_inject_binding_invoke(int argc, VALUE *argv, VALUE self);
+static VALUE auto_inject_binding_invoke_without_cond(int argc, VALUE *argv, VALUE self);
+static VALUE auto_inject_binding_invoke_stub(int argc, VALUE *argv, VALUE self);
 
 static ID options_id;
 
@@ -12,6 +14,8 @@ auto_inject_binding(int argc, VALUE *argv, VALUE mod)
     static ID extensions_id;
     static ID keyword_ids[1];
     VALUE extensions, ext_mod, method_sym, options, opt, cond;
+
+    cond = Qundef;
 
     if (!keyword_ids[0]) {
       keyword_ids[0] = rb_intern("if");
@@ -51,7 +55,18 @@ auto_inject_binding(int argc, VALUE *argv, VALUE mod)
     if (rb_mod_include_p(mod, ext_mod) == Qfalse) {
       rb_prepend_module(mod, ext_mod);
     }
-    rb_define_method_id(ext_mod, mid, auto_inject_binding_invoke, -1);
+
+    if (cond == Qundef) {
+      rb_define_method_id(ext_mod, mid, auto_inject_binding_invoke_without_cond, -1);
+    } else if (rb_obj_is_proc(cond) || SYMBOL_P(cond)) {
+      rb_define_method_id(ext_mod, mid, auto_inject_binding_invoke, -1);
+    } else {
+      if (RTEST(cond)) {
+        rb_define_method_id(ext_mod, mid, auto_inject_binding_invoke_without_cond, -1);
+      } else {
+        rb_define_method_id(ext_mod, mid, auto_inject_binding_invoke_stub, -1);
+      }
+    }
 
     return method_sym;
 }
@@ -59,7 +74,7 @@ auto_inject_binding(int argc, VALUE *argv, VALUE mod)
 static VALUE
 auto_inject_binding_invoke(int argc, VALUE *argv, VALUE self)
 {
-  VALUE method_sym, options, binding, args_ary, cond;
+  VALUE method_sym, ext_mod, options, binding, args_ary, cond;
   static VALUE dummy_proc_args, dummy_method_arg[0];
 
   if (!dummy_proc_args) {
@@ -89,6 +104,26 @@ auto_inject_binding_invoke(int argc, VALUE *argv, VALUE self)
   } else {
     rb_ary_unshift(args_ary, Qnil);
   }
+  return rb_call_super(argc + 1, RARRAY_CONST_PTR(args_ary));
+}
+
+
+static VALUE
+auto_inject_binding_invoke_without_cond(int argc, VALUE *argv, VALUE self)
+{
+  VALUE args_ary, binding;
+  args_ary = rb_ary_new_from_values(argc, argv);
+  binding = rb_binding_new();
+  rb_ary_unshift(args_ary, binding);
+  return rb_call_super(argc + 1, RARRAY_CONST_PTR(args_ary));
+}
+
+static VALUE
+auto_inject_binding_invoke_stub(int argc, VALUE *argv, VALUE self)
+{
+  VALUE args_ary;
+  args_ary = rb_ary_new_from_values(argc, argv);
+  rb_ary_unshift(args_ary, Qnil);
   return rb_call_super(argc + 1, RARRAY_CONST_PTR(args_ary));
 }
 
