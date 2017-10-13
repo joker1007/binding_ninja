@@ -21,11 +21,11 @@ auto_inject_binding(int argc, VALUE *argv, VALUE mod)
       extensions_id = rb_intern("@auto_inject_binding_extensions");
     }
 
-    if (rb_cvar_defined(mod, options_id)) {
-      options = rb_cvar_get(mod, options_id);
+    if (rb_ivar_defined(mod, options_id)) {
+      options = rb_ivar_get(mod, options_id);
     } else {
       options = rb_hash_new();
-      rb_cvar_set(mod, options_id, options);
+      rb_ivar_set(mod, options_id, options);
     }
 
     rb_scan_args(argc, argv, "1:", &method_sym, &opt);
@@ -68,7 +68,7 @@ auto_inject_binding_invoke(int argc, VALUE *argv, VALUE self)
   }
 
   method_sym = ID2SYM(rb_frame_this_func());
-  options = rb_cvar_get(CLASS_OF(self), options_id);
+  options = rb_funcall(CLASS_OF(self), rb_intern("auto_inject_binding_options"), 0);
 
   cond = rb_hash_lookup2(options, method_sym, Qtrue);
 
@@ -96,7 +96,7 @@ void
 Init_binding_ninja(void)
 {
   rb_mBindingNinja = rb_define_module("BindingNinja");
-  options_id = rb_intern("@@__auto_inject_binding_options");
+  options_id = rb_intern("@auto_inject_binding_options");
   rb_ivar_set(rb_mBindingNinja, rb_intern("@auto_inject_binding_extensions"), rb_hash_new());
   rb_define_private_method(rb_mBindingNinja, "auto_inject_binding", auto_inject_binding, -1);
 }

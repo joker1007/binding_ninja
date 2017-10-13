@@ -39,9 +39,19 @@ RSpec.describe BindingNinja do
   end
 
   class Bar < Foo
+    def foo6(b)
+      b.local_variables if b
+    end
+
+    auto_inject_binding :foo6, if: :enable_auto_inject_binding?
+
     def enable_auto_inject_binding?
       false
     end
+  end
+
+  class Baz < Bar
+    @auto_inject_binding_options[:foo6] = true
   end
 
   klass = Class.new do
@@ -51,39 +61,70 @@ RSpec.describe BindingNinja do
     end
   end
 
-  it "inject binding" do
-    aggregate_failures do
-      hoge = 1
-      obj = Foo.new
-      expect(obj.foo(1, 2, 3, 4, abc: 2, def: 10)).to match_array([:hoge, :obj, :klass])
-      obj.hoge
-      expect(hoge).to eq(100)
-      if ENV["ENABLE_BINDING_NINJA"]
-        puts "ENABLE_BINDING_NINJA=#{ENV["ENABLE_BINDING_NINJA"]}"
-        expect(obj.foo3).to match_array([:hoge, :obj, :klass])
-      else
-        expect(obj.foo3).to be_nil
-      end
-      expect(obj.foo4).to be_nil
-      expect(obj.foo5).to match_array([:hoge, :obj, :klass])
-      expect(Bar.new.foo4).to match_array([:hoge, :obj, :klass])
-      expect(Bar.new.foo5).to be_nil
-      expect(klass.new.foo).to match_array([:hoge, :obj, :klass])
+  module InjectMod
+    extend BindingNinja
+    auto_inject_binding def foo(b)
+      b.local_variables
     end
   end
 
-  it "create extension module" do
+  class Foo2
+    extend BindingNinja
+  end
+
+  class Foo3
+    include InjectMod
+  end
+
+  module Ext
+    refine Foo2 do
+      include InjectMod
+    end
+  end
+
+  using Ext
+
+  it "inject binding", aggregate_failures: true do
+    hoge = 1
+    obj = Foo.new
+    expect(obj.foo(1, 2, 3, 4, abc: 2, def: 10)).to match_array([:hoge, :obj, :klass])
+    obj.hoge
+    expect(hoge).to eq(100)
+    if ENV["ENABLE_BINDING_NINJA"]
+      puts "ENABLE_BINDING_NINJA=#{ENV["ENABLE_BINDING_NINJA"]}"
+      expect(obj.foo3).to match_array([:hoge, :obj, :klass])
+    else
+      expect(obj.foo3).to be_nil
+    end
+    expect(obj.foo4).to be_nil
+    expect(obj.foo5).to match_array([:hoge, :obj, :klass])
+    expect(Bar.new.foo4).to match_array([:hoge, :obj, :klass])
+    expect(Bar.new.foo5).to be_nil
+    expect(Bar.new.foo6).to be_nil
+    expect(Baz.new.foo6).to match_array([:hoge, :obj, :klass])
+    expect(klass.new.foo).to match_array([:hoge, :obj, :klass])
+    expect(Foo2.new.foo).to match_array([:hoge, :obj, :klass])
+  end
+
+  it "create extension module", aggregate_failures: true do
     expect(BindingNinja.send(:instance_variable_get, "@auto_inject_binding_extensions")[Foo]).to be_a(Module)
-    expect(Foo.send(:class_variable_get, "@@__auto_inject_binding_options")).to match({
+    expect(Foo.auto_inject_binding_options).to match({
       :foo3 => nil,
       :foo4 => an_instance_of(Proc),
       :foo5 => :enable_auto_inject_binding?,
     })
-    expect(Bar.send(:class_variable_get, "@@__auto_inject_binding_options")).to match({
+    expect(Bar.auto_inject_binding_options).to match({
       :foo3 => nil,
       :foo4 => an_instance_of(Proc),
       :foo5 => :enable_auto_inject_binding?,
+      :foo6 => :enable_auto_inject_binding?,
     })
-    expect(klass.send(:class_variable_get, "@@__auto_inject_binding_options")).to match({})
+    expect(Baz.auto_inject_binding_options).to match({
+      :foo3 => nil,
+      :foo4 => an_instance_of(Proc),
+      :foo5 => :enable_auto_inject_binding?,
+      :foo6 => true,
+    })
+    expect(klass.auto_inject_binding_options).to match({})
   end
 end
