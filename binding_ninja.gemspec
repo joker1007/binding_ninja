@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{pass binding of method caller implicitly}
   spec.description   = %q{pass binding of method caller implicitly}
   spec.homepage      = "https://github.com/joker1007/binding_ninja"
+  spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
