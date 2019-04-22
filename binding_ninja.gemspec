@@ -20,7 +20,14 @@ Gem::Specification.new do |spec|
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
-  spec.extensions    = ["ext/binding_ninja/extconf.rb"]
+
+  case RUBY_PLATFORM
+  when /java/
+    spec.platform = "java"
+    spec.files << "lib/binding_ninja/binding_ninja.jar"
+  else
+    spec.extensions = ["ext/binding_ninja/extconf.rb"]
+  end
 
   spec.add_development_dependency "bundler", "~> 1.15"
   spec.add_development_dependency "rake", "~> 10.0"
