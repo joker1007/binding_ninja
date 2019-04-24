@@ -1,5 +1,11 @@
 require "binding_ninja/version"
-require "binding_ninja/binding_ninja"
+
+if /java/ =~ RUBY_PLATFORM
+  require_relative 'binding_ninja/binding_ninja.jar'
+  Java::IoGithubJoker1007::BindingNinjaService.new.basicLoad(JRuby.runtime)
+else
+  require "binding_ninja/binding_ninja"
+end
 
 module BindingNinja
   def auto_inject_binding_options

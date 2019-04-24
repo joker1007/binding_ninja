@@ -12,6 +12,7 @@
 *.o
 *.a
 mkmf.log
+lib/binding_ninja/binding_ninja.jar
 
 # rspec failure tracking
 .rspec_status

@@ -105,7 +105,14 @@ RSpec.describe BindingNinja do
     expect(Bar.new.foo6).to be_nil
     expect(Baz.new.foo6).to match_array([:hoge, :obj, :klass])
     expect(klass.new.foo).to match_array([:hoge, :obj, :klass])
-    expect(Foo2.new.foo).to match_array([:hoge, :obj, :klass])
+    case RUBY_PLATFORM
+    when /java/
+      skip 'JRuby refinement support is WIP' do
+        expect(Foo2.new.foo).to match_array([:hoge, :obj, :klass])
+      end
+    else
+      expect(Foo2.new.foo).to match_array([:hoge, :obj, :klass])
+    end
   end
 
   it "create extension module", aggregate_failures: true do
