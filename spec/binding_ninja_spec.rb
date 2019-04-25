@@ -105,7 +105,9 @@ RSpec.describe BindingNinja do
     expect(Bar.new.foo6).to be_nil
     expect(Baz.new.foo6).to match_array([:hoge, :obj, :klass])
     expect(klass.new.foo).to match_array([:hoge, :obj, :klass])
-    expect(Foo2.new.foo).to match_array([:hoge, :obj, :klass])
+    if RUBY_PLATFORM =~ /java/ && Gem::Version.new(JRUBY_VERSION) >= Gem::Version.new("9.2.7.0")
+      expect(Foo2.new.foo).to match_array([:hoge, :obj, :klass])
+    end
   end
 
   it "create extension module", aggregate_failures: true do

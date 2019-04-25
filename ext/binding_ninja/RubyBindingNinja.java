@@ -1,5 +1,6 @@
 package io.github.joker1007;
 
+import java.util.stream.Stream;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.anno.JRubyModule;
 import org.jruby.ast.util.ArgsUtil;
@@ -14,6 +15,7 @@ import org.jruby.RubyModule;
 import org.jruby.RubyProc;
 import org.jruby.RubySymbol;
 import org.jruby.runtime.Block;
+import org.jruby.runtime.Constants;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.Helpers;
 import org.jruby.runtime.ThreadContext;
@@ -23,6 +25,7 @@ import org.jruby.runtime.Visibility;
 public class RubyBindingNinja {
   static String OPTIONS_ID = "@auto_inject_binding_options";
   static String EXTENSIONS_ID = "@auto_inject_binding_extensions";
+  static Integer[] jrubyVersionNums = Stream.of(Constants.VERSION.split("\\.")).map(Integer::parseInt).toArray(Integer[]::new);
 
   @JRubyMethod(name = "auto_inject_binding", module = true, visibility = Visibility.PRIVATE, required = 1, optional = 1)
   public static IRubyObject autoInjectBinding(ThreadContext context, IRubyObject recv, IRubyObject[] args) {
@@ -108,7 +111,11 @@ public class RubyBindingNinja {
           unshiftedArgs[0] = context.nil;
         }
         System.arraycopy(args, 0, unshiftedArgs, 1, args.length);
-        return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
+        if (jrubyVersionNums[0] >= 9 && jrubyVersionNums[1] >= 2 && jrubyVersionNums[2] >= 7) {
+          return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
+        } else {
+          return Helpers.invokeSuper(context, self, extMod, name, unshiftedArgs, block);
+        }
       }
     };
   }
@@ -120,7 +127,11 @@ public class RubyBindingNinja {
         final IRubyObject[] unshiftedArgs = new IRubyObject[args.length + 1];
         unshiftedArgs[0] = context.nil;
         System.arraycopy(args, 0, unshiftedArgs, 1, args.length);
-        return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
+        if (jrubyVersionNums[0] >= 9 && jrubyVersionNums[1] >= 2 && jrubyVersionNums[2] >= 7) {
+          return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
+        } else {
+          return Helpers.invokeSuper(context, self, extMod, name, unshiftedArgs, block);
+        }
       }
     };
   }
@@ -132,7 +143,11 @@ public class RubyBindingNinja {
         final IRubyObject[] unshiftedArgs = new IRubyObject[args.length + 1];
         unshiftedArgs[0] = RubyBinding.newBinding(context.getRuntime(), context.currentBinding());
         System.arraycopy(args, 0, unshiftedArgs, 1, args.length);
-        return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
+        if (jrubyVersionNums[0] >= 9 && jrubyVersionNums[1] >= 2 && jrubyVersionNums[2] >= 7) {
+          return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
+        } else {
+          return Helpers.invokeSuper(context, self, extMod, name, unshiftedArgs, block);
+        }
       }
     };
   }
