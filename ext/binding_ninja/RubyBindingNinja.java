@@ -85,7 +85,7 @@ public class RubyBindingNinja {
     return new JavaMethod(extMod, Visibility.PUBLIC, name) {
       @Override
       public IRubyObject call(ThreadContext context, IRubyObject self, RubyModule clazz, String name, IRubyObject[] args, Block block) {
-        final IRubyObject options = Helpers.invoke(context, clazz, "auto_inject_binding_options");
+        final IRubyObject options = Helpers.invoke(context, self.getMetaClass(), "auto_inject_binding_options");
         IRubyObject cond = ((org.jruby.RubyHash)options).op_aref(context, RubySymbol.newSymbol(context.getRuntime(), name));
 
         final RubyClass klass = cond.getMetaClass().getRealClass();
@@ -108,7 +108,7 @@ public class RubyBindingNinja {
           unshiftedArgs[0] = context.nil;
         }
         System.arraycopy(args, 0, unshiftedArgs, 1, args.length);
-        return Helpers.invokeSuper(context, self, extMod, name, unshiftedArgs, block);
+        return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
       }
     };
   }
@@ -120,7 +120,7 @@ public class RubyBindingNinja {
         final IRubyObject[] unshiftedArgs = new IRubyObject[args.length + 1];
         unshiftedArgs[0] = context.nil;
         System.arraycopy(args, 0, unshiftedArgs, 1, args.length);
-        return Helpers.invokeSuper(context, self, extMod, name, unshiftedArgs, block);
+        return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
       }
     };
   }
@@ -132,7 +132,7 @@ public class RubyBindingNinja {
         final IRubyObject[] unshiftedArgs = new IRubyObject[args.length + 1];
         unshiftedArgs[0] = RubyBinding.newBinding(context.getRuntime(), context.currentBinding());
         System.arraycopy(args, 0, unshiftedArgs, 1, args.length);
-        return Helpers.invokeSuper(context, self, extMod, name, unshiftedArgs, block);
+        return Helpers.invokeSuper(context, self, clazz, name, unshiftedArgs, block);
       }
     };
   }
