@@ -21,6 +21,13 @@ Or install it yourself as:
 
     $ gem install binding_ninja
 
+## Supported Ruby Implementations
+
+- MRI
+- JRuby-9.2.6.0 or later
+  - JRuby-9.2.6.0 cannot use this with Refinements
+  - JRuby-9.2.7.0 is OK
+
 ## Usage
 
 ```ruby
