@@ -1,5 +1,8 @@
 sudo: false
 language: ruby
+arch:
+  - amd64
+  - ppc64le
 rvm:
   - 2.5.5
   - 2.6.3
